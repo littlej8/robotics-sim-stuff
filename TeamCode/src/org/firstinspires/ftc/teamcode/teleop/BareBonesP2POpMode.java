@@ -15,6 +15,7 @@ import java.util.List;
 @TeleOp(name = "BareBonesLocalizationOpMode")
 public class BareBonesP2POpMode extends LinearOpMode {
     String[] motorNames = new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
+    double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
     List<DcMotorEx> motors = new ArrayList<>();
 
     IMU imu;
@@ -28,9 +29,9 @@ public class BareBonesP2POpMode extends LinearOpMode {
     public static double TARGET_Y = 0.0;
     public static double TARGET_HEADING = 0.0;
 
-    public static double Px = 0.0;
-    public static double Py = 0.0;
-    public static double Ph = 0.0;
+    public static double Px = 0.1;
+    public static double Py = 0.1;
+    public static double Ph = 0.01;
     public static double MAX_WHEEL_POWER = 0.3;
 
     @Override
@@ -125,8 +126,16 @@ public class BareBonesP2POpMode extends LinearOpMode {
             // get field oriented x, y, and turn powers through a p controller
             double xPower = Math.min(Math.max((TARGET_X - curPose[0]) * Px, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
             double yPower = Math.min(Math.max((TARGET_Y - curPose[1]) * Py, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
-            double headingError = (TARGET_HEADING - curPose[2]) % 180;
+            double headingError = angleWrap(Math.toRadians(TARGET_HEADING) - curPose[2]);
             double hPower = Math.min(Math.max(headingError * Ph, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
+
+            // if the power is negligable, set it to 0
+            if (Math.abs(xPower) < 0.01)
+                xPower = 0;
+            if (Math.abs(yPower) < 0.01)
+                yPower = 0;
+            if (Math.abs(hPower) < 0.01)
+                hPower = 0;
 
             // rotate the x and y powers by the opposite of the robot's heading
             double x0 = xPower;
@@ -161,19 +170,28 @@ public class BareBonesP2POpMode extends LinearOpMode {
                 for (int i = 0; i < 4; i++)
                     p[i] /= max;
 
-            // set motor powers
+            // set motor powers only if the difference is noticable or sets to 0
             for (int i = 0; i < 4; i++)
-                motors.get(i).setPower(p[i]);
+                if (Math.abs(motorCache[i] - p[i]) > 0.05 || p[i] == 0)
+                    motors.get(i).setPower(p[i]);
 
             // log all data
-            telemetry.addData("Position", "(%.2f, %.2f)", curPose[0], curPose[1]);
-            telemetry.addData("Heading", "%.1f", Math.toDegrees(curPose[2]));
-            telemetry.addData("Velocity", "(%.2f, %.2f)", twist[0], twist[1]);
-            telemetry.addData("Angular Velocity", "%.1f", Math.toDegrees(twistRobotTheta));
-            //sleep(1);
+            telemetry.addData("Current Pose", "(%.2f, %.2f, %.2f)", curPose[0], curPose[1], Math.toDegrees(curPose[2]));
+            telemetry.addData("Target Pose", "(%.2f, %.2f, %.2f)", TARGET_X, TARGET_Y, TARGET_HEADING);
+            telemetry.addData("Velocity", "(%.2f, %.2f, %.2f)", twist[0], twist[1], Math.toDegrees(twistRobotTheta));
             telemetry.addData("Loop Time", "%d hz", 1000 / (System.currentTimeMillis() - startTime));
             telemetry.update();
         }
+    }
+
+    public static double angleWrap(double radians) {
+        while (radians > Math.PI) {
+            radians -= 2 * Math.PI;
+        }
+        while (radians < -Math.PI) {
+            radians += 2 * Math.PI;
+        }
+        return radians;
     }
 
     // integrate the last change into the total estimate using the constant acceleration formula
