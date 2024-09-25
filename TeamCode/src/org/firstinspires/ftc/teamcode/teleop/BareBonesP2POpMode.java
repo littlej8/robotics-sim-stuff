@@ -20,10 +20,15 @@ public class BareBonesP2POpMode extends LinearOpMode {
 
     IMU imu;
 
-    public static double STRAFE_MULT = 1.0;
+    // TODO: tune based on the wheels and motors
     public static double TICKS_PER_REV = 1120;
     public static double WHEEL_DIAMETER = 4;
+    
     public static double IN_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REV;
+
+    public static double STRAFE_MULT = 1.0;
+    public static double FORWARD_MULT = 1.0;
+    public static double HEADING_MULT = 1.0;
 
     public static double TARGET_X = 0.0;
     public static double TARGET_Y = 0.0;
@@ -106,7 +111,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
             double dbl = (wheels[2] - prevWheels[2]) * IN_PER_TICK;
             double dbr = (wheels[3] - prevWheels[3]) * IN_PER_TICK;
 
-            // use inverse kinematics to figure out how the robot moved based on the wheels
+            // use forward kinematics to figure out how the robot moved based on the wheels
             double twistRobotY = (dfl + dfr + dbl + dbr) / 4;
             double twistRobotX = (dbl + dfr - dfl - dbr) / 4;
             double twistRobotTheta = heading - prevHeading;
@@ -118,7 +123,11 @@ public class BareBonesP2POpMode extends LinearOpMode {
             prevHeading = heading;
 
             // integrate the change into the current estimate in field coordinates
-            double[] twist = new double[]{twistRobotX * STRAFE_MULT, twistRobotY, twistRobotTheta};
+            double[] twist = new double[]{
+                twistRobotX * STRAFE_MULT,
+                twistRobotY * FORWARD_MULT,
+                twistRobotTheta * HEADING_MULT
+            };
 
             exp(curPose, twist);
             curPose[2] = heading;
@@ -145,7 +154,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
             xPower = x0 * cos - y0 * sin;
             yPower = x0 * sin + y0 * cos;
 
-            // calculate individual wheel powers
+            // calculate individual wheel powers using inverse kinematics
             double[] p = new double[4];
             p[0] = -xPower + yPower - hPower;
             p[1] = xPower + yPower - hPower;
@@ -172,7 +181,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
 
             // set motor powers only if the difference is noticable or sets to 0
             for (int i = 0; i < 4; i++)
-                if (Math.abs(motorCache[i] - p[i]) > 0.05 || p[i] == 0)
+                if (Math.abs(motorCache[i] - p[i]) > 0.025 || p[i] == 0)
                     motors.get(i).setPower(p[i]);
 
             // log all data
@@ -180,6 +189,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
             telemetry.addData("Target Pose", "(%.2f, %.2f, %.2f)", TARGET_X, TARGET_Y, TARGET_HEADING);
             telemetry.addData("Velocity", "(%.2f, %.2f, %.2f)", twist[0], twist[1], Math.toDegrees(twistRobotTheta));
             telemetry.addData("Loop Time", "%d hz", 1000 / (System.currentTimeMillis() - startTime));
+            telemetry.addData("Pose Mults", "(%f, %f, %f)", FORWARD_MULT, STRAFE_MULT, HEADING_MULT);
             telemetry.update();
         }
     }
