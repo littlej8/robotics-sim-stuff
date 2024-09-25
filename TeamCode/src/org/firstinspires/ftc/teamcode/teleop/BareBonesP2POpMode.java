@@ -26,12 +26,12 @@ public class BareBonesP2POpMode extends LinearOpMode {
     
     public static double IN_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REV;
 
-    public static double STRAFE_MULT = 1.0;
-    public static double FORWARD_MULT = 1.0;
+    public static double STRAFE_MULT = 0.827;
+    public static double FORWARD_MULT = 0.827;
     public static double HEADING_MULT = 1.0;
 
     public static double TARGET_X = 0.0;
-    public static double TARGET_Y = 0.0;
+    public static double TARGET_Y = 24.0;
     public static double TARGET_HEADING = 0.0;
 
     public static double Px = 0.1;
