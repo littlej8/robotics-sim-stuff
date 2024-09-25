@@ -15,7 +15,6 @@ import java.util.List;
 @TeleOp(name = "BareBonesLocalizationOpMode")
 public class BareBonesP2POpMode extends LinearOpMode {
     String[] motorNames = new String[]{"back_left_motor", "front_left_motor", "front_right_motor", "back_right_motor"};
-    double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
     List<DcMotorEx> motors = new ArrayList<>();
 
     IMU imu;
@@ -75,6 +74,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
         double[] prevWheels = new double[]{0, 0, 0, 0}, wheels = new double[]{0, 0, 0, 0};
         double heading = 0, prevHeading = 0;
         double[] curPose = new double[]{0.0, 0.0, 0.0};
+        double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
 
         while (!isStopRequested()) {
             long startTime = System.currentTimeMillis();
@@ -180,9 +180,12 @@ public class BareBonesP2POpMode extends LinearOpMode {
                     p[i] /= max;
 
             // set motor powers only if the difference is noticable or sets to 0
-            for (int i = 0; i < 4; i++)
-                if (Math.abs(motorCache[i] - p[i]) > 0.025 || p[i] == 0)
+            for (int i = 0; i < 4; i++) {
+                if (Math.abs(motorCache[i] - p[i]) > 0.01 || p[i] == 0) {
                     motors.get(i).setPower(p[i]);
+                    motorCache[i] = p[i];
+                }
+            }
 
             // log all data
             telemetry.addData("Current Pose", "(%.2f, %.2f, %.2f)", curPose[0], curPose[1], Math.toDegrees(curPose[2]));
