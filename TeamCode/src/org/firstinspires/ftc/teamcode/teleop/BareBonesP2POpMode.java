@@ -21,8 +21,8 @@ public class BareBonesP2POpMode extends LinearOpMode {
     IMU imu;
 
     // TODO: tune based on the wheels and motors
-    public static double TICKS_PER_REV = 1120;
-    public static double WHEEL_DIAMETER = 4;
+    public static double TICKS_PER_REV = 1120; //145.1 if 1150rpm motors
+    public static double WHEEL_DIAMETER = 4; //2 if small black wheels
     
     public static double IN_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REV;
 
