@@ -20,8 +20,8 @@ public class BareBonesP2POpMode extends LinearOpMode {
     IMU imu;
 
     // TODO: tune based on the wheels and motors
-    public static double TICKS_PER_REV = 145.1; //145.1 if 1150rpm motors
-    public static double WHEEL_DIAMETER = 2; //2 if small black wheels
+    public static double TICKS_PER_REV = 145.1; //145.1 if 1150rpm motors; 384.5 if 435rpm
+    public static double WHEEL_DIAMETER = 2; //2 if small black wheels; 4 if big gray
     
     public static double IN_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REV;
 
@@ -78,8 +78,16 @@ public class BareBonesP2POpMode extends LinearOpMode {
         double[] curPose = new double[]{0.0, 0.0, 0.0};
         double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
 
+        double[][] waypoints = {{0, 24, 0}, {24, 24, 90}, {24, 0, 180}, {0, 0, 0}};
+        int currentWaypoint = 0;
+        boolean runningPoints = false;
+
+        //Gamepad prevGamepad1 = new Gamepad(gamepad1);
+
         while (!isStopRequested()) {
             long startTime = System.currentTimeMillis();
+
+            //prevGamepad1.copy(gamepad1);
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
@@ -133,6 +141,8 @@ public class BareBonesP2POpMode extends LinearOpMode {
 
             exp(curPose, twist);
             curPose[2] = heading;
+
+            if (
 
             // get field oriented x, y, and turn powers through a p controller
             double xPower = (TARGET_X - curPose[0]) * Px;
