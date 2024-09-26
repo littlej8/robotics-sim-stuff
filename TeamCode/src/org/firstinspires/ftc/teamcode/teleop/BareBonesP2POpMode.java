@@ -135,10 +135,10 @@ public class BareBonesP2POpMode extends LinearOpMode {
             curPose[2] = heading;
 
             // get field oriented x, y, and turn powers through a p controller
-            double xPower = Math.min(Math.max((TARGET_X - curPose[0]) * Px, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
-            double yPower = Math.min(Math.max((TARGET_Y - curPose[1]) * Py, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
+            double xPower = (TARGET_X - curPose[0]) * Px;
+            double yPower = (TARGET_Y - curPose[1]) * Py;
             double headingError = angleWrap(Math.toRadians(TARGET_HEADING) - curPose[2]);
-            double hPower = Math.min(Math.max(headingError * Ph, -MAX_WHEEL_POWER), MAX_WHEEL_POWER);
+            double hPower = headingError * Ph;
 
             // if the power is negligable, set it to 0
             if (Math.abs(xPower) < 0.01)
@@ -177,9 +177,9 @@ public class BareBonesP2POpMode extends LinearOpMode {
                             )
                     )
             );
-            if (max > 1)
+            if (max > MAX_WHEEL_POWER)
                 for (int i = 0; i < 4; i++)
-                    p[i] /= max;
+                    p[i] = (p[i] / max) * MAX_WHEEL_POWER;
 
             // set motor powers only if the difference is noticable or sets to 0
             for (int i = 0; i < 4; i++) {
