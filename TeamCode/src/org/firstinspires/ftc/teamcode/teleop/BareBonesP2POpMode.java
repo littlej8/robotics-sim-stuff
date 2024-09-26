@@ -52,6 +52,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
         // initialize motors to run without encoder
         // (run without encoder just means it doesn't use the encoder to keep speeds consistent)
         for (DcMotorEx motor : motors) {
+            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
@@ -66,7 +67,8 @@ public class BareBonesP2POpMode extends LinearOpMode {
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
         imu = hardwareMap.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(orientationOnRobot));
-
+        imu.resetYaw();
+        
         // 0: fl
         // 1: fr
         // 2: bl
