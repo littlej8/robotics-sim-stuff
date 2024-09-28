@@ -30,14 +30,16 @@ public class BareBonesP2POpMode extends LinearOpMode {
     public static double HEADING_MULT = 1.0;
 
     public static double TARGET_X = 0.0;
-    public static double TARGET_Y = 24.0;
-    public static double TARGET_HEADING = 0.0;
+    public static double TARGET_Y = 84.0;
+    public static double TARGET_HEADING = 180.0;
 
     public static double Px = 0.1;
     public static double Py = 0.1;
     public static double Ph = 0.01;
     public static double MAX_WHEEL_POWER = 0.3;
 
+    public static long programStartTime = System.currentTimeMillis();
+    
     @Override
     public void runOpMode() {
         // activate bulk-reading for faster loop times
@@ -89,6 +91,11 @@ public class BareBonesP2POpMode extends LinearOpMode {
         while (!isStopRequested()) {
             long startTime = System.currentTimeMillis();
 
+            if (startTime - programStartTime > 10000) {
+                TARGET_Y = 0;
+                TARGET_HEADING = 0;
+            }
+            
             //prevGamepad1.copy(gamepad1);
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
@@ -207,6 +214,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
             telemetry.addData("Velocity", "(%.2f, %.2f, %.2f)", twist[0], twist[1], Math.toDegrees(twistRobotTheta));
             telemetry.addData("Loop Time", "%d hz", 1000 / (System.currentTimeMillis() - startTime));
             telemetry.addData("Pose Mults", "(%f, %f, %f)", FORWARD_MULT, STRAFE_MULT, HEADING_MULT);
+            telemetry.addData("Time since start", "%d", (startTime - programStartTime) / 1000);
             telemetry.update();
         }
     }
