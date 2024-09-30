@@ -91,8 +91,16 @@ public class BareBonesP2POpMode extends LinearOpMode {
         while (!isStopRequested()) {
             long startTime = System.currentTimeMillis();
 
-            if (startTime - programStartTime > 10000) {
+            if (startTime - programStartTime > 7500) {
+                TARGET_X = 84;
+                TARGET_HEADING = 0;
+            }
+            if (startTime - programStartTime > 15000) {
                 TARGET_Y = 0;
+                TARGET_HEADING = 180;
+            }
+            if (startTime - programStartTime > 22500) {
+                TARGET_X = 0;
                 TARGET_HEADING = 0;
             }
             
@@ -150,8 +158,6 @@ public class BareBonesP2POpMode extends LinearOpMode {
 
             exp(curPose, twist);
             curPose[2] = heading;
-
-            if (
 
             // get field oriented x, y, and turn powers through a p controller
             double xPower = (TARGET_X - curPose[0]) * Px;
@@ -219,6 +225,16 @@ public class BareBonesP2POpMode extends LinearOpMode {
         }
     }
 
+    // returns an array of [linear_dist, angular_dist]
+    public static double[] dist(double[] pose1, double[] pose2) {
+        return new double[]{
+            Math.sqrt(Math.pow(pose2[0] - pose1[0], 2) + Math.pow(pose2[1] - pose1[1])),
+            Math.abs(pose2[2] - pose1[2])
+        };
+    }
+        
+
+    // returns an angle between -pi and pi
     public static double angleWrap(double radians) {
         while (radians > Math.PI) {
             radians -= 2 * Math.PI;
