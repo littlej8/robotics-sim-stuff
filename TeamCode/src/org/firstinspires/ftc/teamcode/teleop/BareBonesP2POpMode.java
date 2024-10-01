@@ -25,8 +25,9 @@ public class BareBonesP2POpMode extends LinearOpMode {
     
     public static double IN_PER_TICK = (WHEEL_DIAMETER * Math.PI) / TICKS_PER_REV;
 
-    public static double STRAFE_MULT = 1.0;
-    public static double FORWARD_MULT = 1.0;
+    // TODO: Adjust based on observed results
+    public static double STRAFE_MULT = 1.3;
+    public static double FORWARD_MULT = 1.485;
     public static double HEADING_MULT = 1.0;
 
     public static double TARGET_X = 0.0;
@@ -80,28 +81,26 @@ public class BareBonesP2POpMode extends LinearOpMode {
         double[] curPose = new double[]{0.0, 0.0, 0.0};
         double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
 
-        //Gamepad prevGamepad1 = new Gamepad(gamepad1);
-
         waitForStart();
         
         while (!isStopRequested()) {
             long startTime = System.currentTimeMillis();
 
             if (startTime - programStartTime > 7500) {
-                TARGET_X = 84;
+                TARGET_X = 72;
                 TARGET_HEADING = 0;
             }
             if (startTime - programStartTime > 15000) {
-                TARGET_Y = 0;
+                TARGET_Y = 12;
                 TARGET_HEADING = 180;
             }
             if (startTime - programStartTime > 22500) {
                 TARGET_X = 0;
                 TARGET_HEADING = 0;
             }
+            if (startTime - programStartTime > 30000)
+                TARGET_Y = 0;
             
-            //prevGamepad1.copy(gamepad1);
-
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
             // get the change in encoder position converted to inches
@@ -197,7 +196,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
             telemetry.addData("Velocity", "(%.2f, %.2f, %.2f)", twist[0], twist[1], Math.toDegrees(twistRobotTheta));
             telemetry.addData("Loop Time", "%d hz", 1000 / (System.currentTimeMillis() - startTime));
             telemetry.addData("Pose Mults", "(%f, %f, %f)", FORWARD_MULT, STRAFE_MULT, HEADING_MULT);
-            telemetry.addData("Time since start", "%d", (startTime - programStartTime) / 1000);
+            telemetry.addData("Time since start", "%d", (startTime - programStartTime) / 1000.0);
             telemetry.update();
         }
     }
