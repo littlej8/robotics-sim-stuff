@@ -33,9 +33,9 @@ public class BareBonesP2POpMode extends LinearOpMode {
     public static double TARGET_Y = 84.0;
     public static double TARGET_HEADING = 180.0;
 
-    public static double Px = 0.1;
-    public static double Py = 0.1;
-    public static double Ph = 0.01;
+    public static double Px = 1;
+    public static double Py = 1;
+    public static double Ph = 3;
     public static double MAX_WHEEL_POWER = 0.3;
 
     public static long programStartTime = System.currentTimeMillis();
@@ -80,10 +80,6 @@ public class BareBonesP2POpMode extends LinearOpMode {
         double[] curPose = new double[]{0.0, 0.0, 0.0};
         double[] motorCache = new double[]{0.0, 0.0, 0.0, 0.0};
 
-        double[][] waypoints = {{0, 24, 0}, {24, 24, 90}, {24, 0, 180}, {0, 0, 0}};
-        int currentWaypoint = 0;
-        boolean runningPoints = false;
-
         //Gamepad prevGamepad1 = new Gamepad(gamepad1);
 
         waitForStart();
@@ -107,25 +103,6 @@ public class BareBonesP2POpMode extends LinearOpMode {
             //prevGamepad1.copy(gamepad1);
 
             heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-            /*double x = gamepad1.left_stick_x;
-            double y = -gamepad1.left_stick_y;
-            double a = -gamepad1.right_stick_x;
-
-            double x0 = x;
-            double y0 = y;
-            x = (Math.cos(-heading) * x0) - (Math.sin(-heading) * y0);
-            y = (Math.sin(-heading) * x0) + (Math.cos(-heading) * y0);
-
-            double[] p = new double[4];
-            p[0] = -x + y - a;
-            p[1] = x + y - a;
-            p[2] = -x + y + a;
-            p[3] = x + y + a;
-
-            double max = Math.max(1, Math.max(Math.abs(p[0]), Math.max(Math.abs(p[1]), Math.max(Math.abs(p[2]), Math.abs(p[3])))));
-            if (max > 1) for (int i = 0; i < 4; i++) p[i] /= max;
-            for (int i = 0; i < 4; i++) motors.get(i).setPower(p[i]);*/
 
             // get the change in encoder position converted to inches
             wheels[0] = motors.get(1).getCurrentPosition();
@@ -228,7 +205,7 @@ public class BareBonesP2POpMode extends LinearOpMode {
     // returns an array of [linear_dist, angular_dist]
     public static double[] dist(double[] pose1, double[] pose2) {
         return new double[]{
-            Math.sqrt(Math.pow(pose2[0] - pose1[0], 2) + Math.pow(pose2[1] - pose1[1])),
+            Math.sqrt(Math.pow(pose2[0] - pose1[0], 2) + Math.pow(pose2[1] - pose1[1], 2)),
             Math.abs(pose2[2] - pose1[2])
         };
     }
